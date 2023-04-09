@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "author": "Askrella Software Agency UG (haftungsbeschränkt)",
   "scripts": {
-    "start": "npx vite-node src/index.ts",
+    "start": "vite-node src/index.ts",
     "prettier": "prettier --write src"
   },
   "license": "MIT",
@@ -27,11 +27,12 @@
     "@typescript-eslint/eslint-plugin": "5.57.1",
     "@typescript-eslint/parser": "5.57.1",
     "eslint": "^8.38.0",
-    "eslint-plugin-prettier": "^4.2.1",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-node": "^11.1.0",
-    "prettier": "^2.8.4"
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.4",
+    "vite-node": "^0.30.0"
   },
   "engines": {
     "node": ">=18.0.0"

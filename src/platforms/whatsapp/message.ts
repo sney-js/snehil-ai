@@ -12,106 +12,96 @@ import { handleMessageDALLE } from '../../handlers/dalle';
 import { handleMessageAIConfig } from '../../handlers/ai-config';
 
 // Speech API & Whisper
-import { TranscriptionMode, TTSMode } from './speech/transcription-mode';
-import {
-  transcribeRequest,
-  ttsRequest as speechTTSRequest
-} from './speech/speech';
-import { transcribeAudioLocal } from './speech/whisper-local';
-import { transcribeWhisperApi } from './speech/whisper-api';
 
 // For deciding to ignore old messages
-import { transcribeOpenAI } from './speech/openai';
 import { Message, MessageMedia } from 'whatsapp-web.js';
-import { ttsRequest as awsTTSRequest } from './speech/aws';
-import os from 'os';
-import path from 'path';
-import { randomUUID } from 'crypto';
-import fs from 'fs';
+
+type RequestOptions = {
+  requestedConfigChange: boolean;
+  requestedReset: boolean;
+  requestedChatAI: boolean;
+  requestedImageAI: boolean;
+  any: boolean;
+};
+
+function getPrompt(body: string, requestOptions: RequestOptions) {
+  if (requestOptions.requestedChatAI) {
+    return body.substring(config.gptPrefix.length + 1);
+  }
+  if (requestOptions.requestedImageAI) {
+    return body.substring(config.dallePrefix.length + 1);
+  }
+  if (requestOptions.requestedConfigChange) {
+    return body.substring(config.aiConfigPrefix.length + 1);
+  }
+  if (requestOptions.requestedReset) {
+    return body.substring(config.resetPrefix.length + 1);
+  }
+  return body;
+}
+
+function isCompanionRelevantMessage(message): RequestOptions {
+  const values = {
+    requestedChatAI: startsWithIgnoreCase(message, config.gptPrefix),
+    requestedImageAI: startsWithIgnoreCase(message, config.dallePrefix),
+    requestedConfigChange: startsWithIgnoreCase(message, config.aiConfigPrefix),
+    requestedReset: startsWithIgnoreCase(message, config.resetPrefix),
+    any: false
+  };
+  values.any =
+    values.requestedChatAI ||
+    values.requestedImageAI ||
+    values.requestedConfigChange ||
+    values.requestedReset;
+  return values;
+}
 
 // Handles message
-async function handleIncomingMessage(message: Message) {
-  let messageString = message.body;
-  let transcribedMessage;
+async function handleIncomingMessage(message: Message): Promise<void> {
+  const { body, from, fromMe, hasQuotedMsg, to } = message;
+
+  const requestOptions = isCompanionRelevantMessage(body);
+  // no proessing needed. Ignore message.
+  if (!requestOptions.any) return;
+
+  let prompt = getPrompt(body, requestOptions);
+
   // Ignore groupchats if disabled
-  if ((await message.getChat()).isGroup && !config.groupchatsEnabled) return;
+  let isGroupChat = (await message.getChat())?.isGroup;
+  if (isGroupChat && !config.groupchatsEnabled) return;
 
-  // Transcribe audio
-  if (message.hasMedia) {
-    transcribedMessage = await getTranscription(message);
-
-    // Check transcription is null (error)
-    if (transcribedMessage == null || transcribedMessage.length == 0) {
-      message.reply("I couldn't understand what you said.");
-      return;
-    } else {
-      // Log transcription
-      cli.print(
-        `[Transcription] Transcription response: ${transcribedMessage}`
-      );
-
-      // Reply with transcription
-      message.reply(`You said: ${transcribedMessage}`);
-    }
+  if (hasQuotedMsg) {
+    const repliedMessage: Message = await message.getQuotedMessage();
+    prompt += `----\n${repliedMessage.body}`;
   }
 
-  // Clear conversation context (!clear)
-  if (startsWithIgnoreCase(messageString, config.resetPrefix)) {
-    await handleDeleteConversation(message.from);
+  if (requestOptions.requestedReset) {
+    cli.print(`[RESET] Received prompt from ${from}: ${prompt}`);
+    await handleDeleteConversation(from).then((res) => message.reply(res));
     return;
   }
 
-  // AiConfig (!config <args>)
-  if (startsWithIgnoreCase(messageString, config.aiConfigPrefix)) {
-    const prompt = messageString.substring(config.aiConfigPrefix.length + 1);
-    console.log(
-      '[AI-Config] Received prompt from ' + message.from + ': ' + prompt
-    );
-    await handleMessageAIConfig(prompt).then((reply) => message.reply(reply));
+  if (requestOptions.requestedConfigChange) {
+    console.log(`[AI-Config] Received prompt from ${from}: ${prompt}`);
+    await handleMessageAIConfig(prompt).then((res) => message.reply(res));
     return;
   }
 
-  // GPT (!gpt <prompt>)
-  if (
-    startsWithIgnoreCase(messageString, config.gptPrefix) ||
-    transcribedMessage
-  ) {
-    messageString =
-      transcribedMessage ||
-      messageString.substring(config.gptPrefix.length + 1);
-    await handleMessageGPT(message.from, messageString).then((reply) =>
-      message.reply(reply)
-    );
+  if (requestOptions.requestedChatAI) {
+    cli.print(`[GPT] Received prompt from ${from}: ${prompt}`);
+    await handleMessageGPT(from, prompt).then((res) => message.reply(res));
     return;
   }
 
-  const selfNotedMessage =
-    message.fromMe &&
-    message.hasQuotedMsg === false &&
-    message.from === message.to;
-
-  if (
-    !config.prefixEnabled ||
-    (config.prefixSkippedForMe && selfNotedMessage)
-  ) {
-    await handleMessageGPT(message.from, messageString).then((reply) =>
-      message.reply(reply)
-    );
-    return;
-  }
-
-  // DALLE (!dalle <prompt>)
-  if (startsWithIgnoreCase(messageString, config.dallePrefix)) {
-    messageString = messageString.substring(config.dallePrefix.length + 1);
+  if (requestOptions.requestedImageAI) {
     const start = Date.now();
-    await handleMessageDALLE(messageString)
+    cli.print(`[DALL-E] Received prompt from ${from}: ${prompt}`);
+    await handleMessageDALLE(prompt)
       .then((base64) => {
         const image = new MessageMedia('image/jpeg', base64, 'image.jpg');
 
         const end = Date.now() - start;
-        cli.print(
-          `[DALL-E] Answer to ${message.from} | OpenAI request took ${end}ms`
-        );
+        cli.print(`[DALL-E] Answer to ${from} | OpenAI request took ${end}ms`);
 
         message.reply(image);
       })
@@ -120,118 +110,6 @@ async function handleIncomingMessage(message: Message) {
       });
     return;
   }
-}
-
-async function getTranscription(message: Message) {
-  const media = await message.downloadMedia();
-
-  // Ignore non-audio media
-  if (!media || !media.mimetype.startsWith('audio/')) return null;
-
-  // Check if transcription is enabled (Default: false)
-  if (!config.transcriptionEnabled) {
-    cli.print(
-      '[Transcription] Received voice messsage but voice transcription is disabled.'
-    );
-    return;
-  }
-
-  // Convert media to base64 string
-  const mediaBuffer = Buffer.from(media.data, 'base64');
-
-  // Transcribe locally or with Speech API
-  cli.print(
-    `[Transcription] Transcribing audio with "${config.transcriptionMode}" mode...`
-  );
-
-  let res;
-  switch (config.transcriptionMode) {
-    case TranscriptionMode.Local:
-      res = await transcribeAudioLocal(mediaBuffer);
-      break;
-    case TranscriptionMode.OpenAI:
-      res = await transcribeOpenAI(mediaBuffer);
-      break;
-    case TranscriptionMode.WhisperAPI:
-      res = await transcribeWhisperApi(new Blob([mediaBuffer]));
-      break;
-    case TranscriptionMode.SpeechAPI:
-      res = await transcribeRequest(new Blob([mediaBuffer]));
-      break;
-    default:
-      cli.print(
-        `[Transcription] Unsupported transcription mode: ${config.transcriptionMode}`
-      );
-  }
-  const { text: transcribedText, language: transcribedLanguage } = res;
-
-  return transcribedText;
-}
-
-async function sendVoiceMessageReply(
-  message: Message,
-  gptTextResponse: string
-) {
-  var logTAG = '[TTS]';
-  var ttsRequest = async function (): Promise<Buffer | null> {
-    return await speechTTSRequest(gptTextResponse);
-  };
-
-  switch (config.ttsMode) {
-    case TTSMode.SpeechAPI:
-      logTAG = '[SpeechAPI]';
-      ttsRequest = async function (): Promise<Buffer | null> {
-        return await speechTTSRequest(gptTextResponse);
-      };
-      break;
-
-    case TTSMode.AWSPolly:
-      logTAG = '[AWSPolly]';
-      ttsRequest = async function (): Promise<Buffer | null> {
-        return await awsTTSRequest(gptTextResponse);
-      };
-      break;
-
-    default:
-      logTAG = '[SpeechAPI]';
-      ttsRequest = async function (): Promise<Buffer | null> {
-        return await speechTTSRequest(gptTextResponse);
-      };
-      break;
-  }
-
-  // Get audio buffer
-  cli.print(
-    `${logTAG} Generating audio from GPT response "${gptTextResponse}"...`
-  );
-  const audioBuffer = await ttsRequest();
-
-  // Check if audio buffer is valid
-  if (audioBuffer == null || audioBuffer.length == 0) {
-    message.reply(
-      `${logTAG} couldn't generate audio, please contact the administrator.`
-    );
-    return;
-  }
-
-  cli.print(`${logTAG} Audio generated!`);
-
-  // Get temp folder and file path
-  const tempFolder = os.tmpdir();
-  const tempFilePath = path.join(tempFolder, randomUUID() + '.opus');
-
-  // Save buffer to temp file
-  fs.writeFileSync(tempFilePath, audioBuffer);
-
-  // Send audio
-  const messageMedia = new MessageMedia(
-    'audio/ogg; codecs=opus',
-    audioBuffer.toString('base64')
-  );
-  message.reply(messageMedia);
-
-  // Delete temp file
-  fs.unlinkSync(tempFilePath);
 }
 
 export { handleIncomingMessage };

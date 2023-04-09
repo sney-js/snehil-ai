@@ -18,8 +18,6 @@ const handleMessageGPT = async (
     // Get last conversation
     const lastConversationId = conversations[conversationID];
 
-    cli.print(`[GPT] Received prompt from ${conversationID}: ${prompt}`);
-
     // Prompt Moderation
     if (config.promptModerationEnabled) {
       try {
@@ -83,12 +81,12 @@ const handleMessageGPT = async (
   }
 };
 
-const handleDeleteConversation = async (from: string) => {
+const handleDeleteConversation = async (from: string): Promise<string> => {
   // Delete conversation
   delete conversations[from];
 
   // Reply
-  return 'Conversation context was resetted!';
+  return 'Conversation context has been reset!';
 };
 
 export { handleMessageGPT, handleDeleteConversation };

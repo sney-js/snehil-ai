@@ -64,9 +64,6 @@ const start = async () => {
     // Ignore if message is from status broadcast
     if (message.from == constants.statusBroadcast) return;
 
-    // Ignore if it's a quoted message, (e.g. Bot reply)
-    if (message.hasQuotedMsg) return;
-
     // Prevent handling old messages
     if (message.timestamp != null) {
       const messageTimestamp = new Date(message.timestamp * 1000);

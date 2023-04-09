@@ -1,11 +1,5 @@
 import * as process from 'process';
 
-import {
-  AWSPollyEngine,
-  TranscriptionMode,
-  TTSMode
-} from './platforms/whatsapp/speech/transcription-mode';
-
 // Environment variables
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -32,24 +26,6 @@ interface IConfig {
   // Prompt Moderation
   promptModerationEnabled: boolean;
   promptModerationBlacklistedCategories: string[];
-
-  // AWS
-  awsAccessKeyId: string;
-  awsSecretAccessKey: string;
-  awsRegion: string;
-  awsPollyVoiceId: string;
-  awsPollyEngine: AWSPollyEngine;
-
-  // Voice transcription & Text-to-Speech
-  speechServerUrl: string;
-  whisperServerUrl: string;
-  openAIServerUrl: string;
-  whisperApiKey: string;
-  ttsEnabled: boolean;
-  ttsMode: TTSMode;
-  transcriptionEnabled: boolean;
-  transcriptionMode: TranscriptionMode;
-  transcriptionLanguage: string;
 }
 
 // Config
@@ -77,35 +53,6 @@ const config: IConfig = {
   ), // Default: false
   promptModerationBlacklistedCategories:
     getEnvPromptModerationBlacklistedCategories(), // Default: ["hate", "hate/threatening", "self-harm", "sexual", "sexual/minors", "violence", "violence/graphic"]
-
-  // AWS
-  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID || '', // Default: ""
-  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '', // Default: ""
-  awsRegion: process.env.AWS_REGION || '', // Default: ""
-  awsPollyVoiceId: process.env.AWS_POLLY_VOICE_ID || '', // Default: "Joanna"
-  awsPollyEngine: getEnvAWSPollyVoiceEngine(), // Default: standard
-
-  // Speech API, Default: https://speech-service.verlekar.com
-  speechServerUrl:
-    process.env.SPEECH_API_URL || 'https://speech-service.verlekar.com',
-  whisperServerUrl:
-    process.env.WHISPER_API_URL || 'https://transcribe.whisperapi.com',
-  openAIServerUrl:
-    process.env.OPENAI_API_URL ||
-    'https://api.openai.com/v1/audio/transcriptions',
-  whisperApiKey: process.env.WHISPER_API_KEY || '', // Default: ""
-
-  // Text-to-Speech
-  ttsEnabled: getEnvBooleanWithDefault('TTS_ENABLED', false), // Default: false
-  ttsMode: getEnvTTSMode(), // Default: speech-api
-
-  // Transcription
-  transcriptionEnabled: getEnvBooleanWithDefault(
-    'TRANSCRIPTION_ENABLED',
-    false
-  ), // Default: false
-  transcriptionMode: getEnvTranscriptionMode(), // Default: local
-  transcriptionLanguage: process.env.TRANSCRIPTION_LANGUAGE || '' // Default: null
 };
 
 /**
@@ -155,45 +102,6 @@ function getEnvPromptModerationBlacklistedCategories(): string[] {
   } else {
     return JSON.parse(envValue.replace(/'/g, '"'));
   }
-}
-
-/**
- * Get the transcription mode from the environment variable
- * @returns The transcription mode
- */
-function getEnvTranscriptionMode(): TranscriptionMode {
-  const envValue = process.env.TRANSCRIPTION_MODE?.toLowerCase();
-  if (envValue == undefined || envValue == '') {
-    return TranscriptionMode.Local;
-  }
-
-  return envValue as TranscriptionMode;
-}
-
-/**
- * Get the tss mode from the environment variable
- * @returns The tts mode
- */
-function getEnvTTSMode(): TTSMode {
-  const envValue = process.env.TTS_MODE?.toLowerCase();
-  if (envValue == undefined || envValue == '') {
-    return TTSMode.SpeechAPI;
-  }
-
-  return envValue as TTSMode;
-}
-
-/**
- * Get the AWS Polly voice engine from the environment variable
- * @returns The voice engine
- */
-function getEnvAWSPollyVoiceEngine(): AWSPollyEngine {
-  const envValue = process.env.AWS_POLLY_VOICE_ENGINE?.toLowerCase();
-  if (envValue == undefined || envValue == '') {
-    return AWSPollyEngine.Standard;
-  }
-
-  return envValue as AWSPollyEngine;
 }
 
 export default config;
