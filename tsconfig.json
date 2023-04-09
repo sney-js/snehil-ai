@@ -23,7 +23,9 @@
     "strict": false,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "typeRoots": ["../../node_modules/@types", "./src/types/"]
+    "typeRoots": ["../../node_modules/@types",
+      "./src/utils/"
+    ]
   },
   "include": ["./src", "src/__tests__"],
   "exclude": ["node_modules", "dist", "example", "**/*.mdx"],

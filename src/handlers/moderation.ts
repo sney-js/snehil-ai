@@ -1,5 +1,5 @@
 import * as cli from '../ui/cli';
-import config from '../config';
+import config from '../utils/config';
 import { openai } from '../providers/openai';
 
 /**

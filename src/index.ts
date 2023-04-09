@@ -1,3 +1,5 @@
-import { start as startWhatsapp } from './platforms/whatsapp';
+import { WhatsAppBot } from './platforms/whatsapp';
+import config from './utils/config';
 
-startWhatsapp().then();
+const whatsappBot = new WhatsAppBot(config);
+whatsappBot.initialise().catch();

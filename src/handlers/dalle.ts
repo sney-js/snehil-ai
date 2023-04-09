@@ -1,13 +1,15 @@
 import { openai } from '../providers/openai';
-import { aiConfig } from './ai-config';
-import { CreateImageRequestSizeEnum } from 'openai';
-import config from '../config';
+import config from '../utils/config';
 import * as cli from '../ui/cli';
 
 // Moderation
 import { moderateIncomingPrompt } from './moderation';
+import { CreateImageRequestSizeEnum } from 'openai';
 
-const handleMessageDALLE = async (prompt: any): Promise<string> => {
+const handleMessageDALLE = async (
+  prompt: string,
+  size: 512 | 256 | 1024 = 512
+): Promise<string> => {
   try {
     cli.print(`[DALL-E] Received prompt from  ${prompt}`);
 
@@ -18,9 +20,9 @@ const handleMessageDALLE = async (prompt: any): Promise<string> => {
 
     // Send the prompt to the API
     const response = await openai.createImage({
-      prompt: prompt,
+      prompt,
       n: 1,
-      size: aiConfig.dalle.size as CreateImageRequestSizeEnum,
+      size: `${size}x${size}` as CreateImageRequestSizeEnum,
       response_format: 'b64_json'
     });
 

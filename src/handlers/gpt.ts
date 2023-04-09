@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { chatgpt } from '../providers/openai';
 import * as cli from '../ui/cli';
-import config from '../config';
+import config from '../utils/config';
 
 // Moderation
 import { moderateIncomingPrompt } from './moderation';
@@ -81,7 +81,7 @@ const handleMessageGPT = async (
   }
 };
 
-const handleDeleteConversation = async (from: string): Promise<string> => {
+const handleResetConversation = async (from: string): Promise<string> => {
   // Delete conversation
   delete conversations[from];
 
@@ -89,4 +89,4 @@ const handleDeleteConversation = async (from: string): Promise<string> => {
   return 'Conversation context has been reset!';
 };
 
-export { handleMessageGPT, handleDeleteConversation };
+export { handleMessageGPT, handleResetConversation };
