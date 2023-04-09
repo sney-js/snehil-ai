@@ -1,98 +1,111 @@
-import process from "process";
+import * as process from 'process';
 
-import { TranscriptionMode } from "./types/transcription-mode";
-import { TTSMode } from "./types/tts-mode";
-import { AWSPollyEngine } from "./types/aws-polly-engine";
+import {
+  AWSPollyEngine,
+  TranscriptionMode,
+  TTSMode
+} from './types/transcription-mode';
 
 // Environment variables
-import dotenv from "dotenv";
+import * as dotenv from 'dotenv';
 dotenv.config();
 
 // Config Interface
 interface IConfig {
-	// OpenAI
-	openAIAPIKey: string;
-	openAIModel: string;
-	maxModelTokens: number;
-	prePrompt: string | undefined;
+  // OpenAI
+  openAIAPIKey: string;
+  openAIModel: string;
+  maxModelTokens: number;
+  prePrompt: string | undefined;
 
-	// Prefix
-	prefixEnabled: boolean;
-	prefixSkippedForMe: boolean;
-	gptPrefix: string;
-	dallePrefix: string;
-	resetPrefix: string;
-	aiConfigPrefix: string;
+  // Prefix
+  prefixEnabled: boolean;
+  prefixSkippedForMe: boolean;
+  gptPrefix: string;
+  dallePrefix: string;
+  resetPrefix: string;
+  aiConfigPrefix: string;
 
-	// Groupchats
-	groupchatsEnabled: boolean;
+  // Groupchats
+  groupchatsEnabled: boolean;
 
-	// Prompt Moderation
-	promptModerationEnabled: boolean;
-	promptModerationBlacklistedCategories: string[];
+  // Prompt Moderation
+  promptModerationEnabled: boolean;
+  promptModerationBlacklistedCategories: string[];
 
-	// AWS
-	awsAccessKeyId: string;
-	awsSecretAccessKey: string;
-	awsRegion: string;
-	awsPollyVoiceId: string;
-	awsPollyEngine: AWSPollyEngine;
+  // AWS
+  awsAccessKeyId: string;
+  awsSecretAccessKey: string;
+  awsRegion: string;
+  awsPollyVoiceId: string;
+  awsPollyEngine: AWSPollyEngine;
 
-	// Voice transcription & Text-to-Speech
-	speechServerUrl: string;
-	whisperServerUrl: string;
-	openAIServerUrl: string;
-	whisperApiKey: string;
-	ttsEnabled: boolean;
-	ttsMode: TTSMode;
-	transcriptionEnabled: boolean;
-	transcriptionMode: TranscriptionMode;
-	transcriptionLanguage: string;
+  // Voice transcription & Text-to-Speech
+  speechServerUrl: string;
+  whisperServerUrl: string;
+  openAIServerUrl: string;
+  whisperApiKey: string;
+  ttsEnabled: boolean;
+  ttsMode: TTSMode;
+  transcriptionEnabled: boolean;
+  transcriptionMode: TranscriptionMode;
+  transcriptionLanguage: string;
 }
 
 // Config
 const config: IConfig = {
-	openAIAPIKey: process.env.OPENAI_API_KEY || "", // Default: ""
-	openAIModel: process.env.OPENAI_GPT_MODEL || "gpt-3.5-turbo", // Default: gpt-3.5-turbo
-	maxModelTokens: getEnvMaxModelTokens(), // Default: 4096
-	prePrompt: process.env.PRE_PROMPT, // Default: undefined
+  openAIAPIKey: process.env.OPENAI_API_KEY || '', // Default: ""
+  openAIModel: process.env.OPENAI_GPT_MODEL || 'gpt-3.5-turbo', // Default: gpt-3.5-turbo
+  maxModelTokens: getEnvMaxModelTokens(), // Default: 4096
+  prePrompt: process.env.PRE_PROMPT, // Default: undefined
 
-	// Prefix
-	prefixEnabled: getEnvBooleanWithDefault("PREFIX_ENABLED", true), // Default: true
-	prefixSkippedForMe: getEnvBooleanWithDefault("PREFIX_SKIPPED_FOR_ME", true), // Default: true
-	gptPrefix: process.env.GPT_PREFIX || "!gpt", // Default: !gpt
-	dallePrefix: process.env.DALLE_PREFIX || "!dalle", // Default: !dalle
-	resetPrefix: process.env.RESET_PREFIX || "!reset", // Default: !reset
-	aiConfigPrefix: process.env.AI_CONFIG_PREFIX || "!config", // Default: !config
+  // Prefix
+  prefixEnabled: getEnvBooleanWithDefault('PREFIX_ENABLED', true), // Default: true
+  prefixSkippedForMe: getEnvBooleanWithDefault('PREFIX_SKIPPED_FOR_ME', true), // Default: true
+  gptPrefix: process.env.GPT_PREFIX || '!gpt', // Default: !gpt
+  dallePrefix: process.env.DALLE_PREFIX || '!dalle', // Default: !dalle
+  resetPrefix: process.env.RESET_PREFIX || '!reset', // Default: !reset
+  aiConfigPrefix: process.env.AI_CONFIG_PREFIX || '!config', // Default: !config
 
-	// Groupchats
-	groupchatsEnabled: getEnvBooleanWithDefault("GROUPCHATS_ENABLED", false), // Default: false
+  // Groupchats
+  groupchatsEnabled: getEnvBooleanWithDefault('GROUPCHATS_ENABLED', false), // Default: false
 
-	// Prompt Moderation
-	promptModerationEnabled: getEnvBooleanWithDefault("PROMPT_MODERATION_ENABLED", false), // Default: false
-	promptModerationBlacklistedCategories: getEnvPromptModerationBlacklistedCategories(), // Default: ["hate", "hate/threatening", "self-harm", "sexual", "sexual/minors", "violence", "violence/graphic"]
+  // Prompt Moderation
+  promptModerationEnabled: getEnvBooleanWithDefault(
+    'PROMPT_MODERATION_ENABLED',
+    false
+  ), // Default: false
+  promptModerationBlacklistedCategories:
+    getEnvPromptModerationBlacklistedCategories(), // Default: ["hate", "hate/threatening", "self-harm", "sexual", "sexual/minors", "violence", "violence/graphic"]
 
-	// AWS
-	awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID || "", // Default: ""
-	awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "", // Default: ""
-	awsRegion: process.env.AWS_REGION || "", // Default: ""
-	awsPollyVoiceId: process.env.AWS_POLLY_VOICE_ID || "", // Default: "Joanna"
-	awsPollyEngine: getEnvAWSPollyVoiceEngine(), // Default: standard
+  // AWS
+  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID || '', // Default: ""
+  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '', // Default: ""
+  awsRegion: process.env.AWS_REGION || '', // Default: ""
+  awsPollyVoiceId: process.env.AWS_POLLY_VOICE_ID || '', // Default: "Joanna"
+  awsPollyEngine: getEnvAWSPollyVoiceEngine(), // Default: standard
 
-	// Speech API, Default: https://speech-service.verlekar.com
-	speechServerUrl: process.env.SPEECH_API_URL || "https://speech-service.verlekar.com",
-	whisperServerUrl: process.env.WHISPER_API_URL || "https://transcribe.whisperapi.com",
-	openAIServerUrl: process.env.OPENAI_API_URL || "https://api.openai.com/v1/audio/transcriptions",
-	whisperApiKey: process.env.WHISPER_API_KEY || "", // Default: ""
+  // Speech API, Default: https://speech-service.verlekar.com
+  speechServerUrl:
+    process.env.SPEECH_API_URL || 'https://speech-service.verlekar.com',
+  whisperServerUrl:
+    process.env.WHISPER_API_URL || 'https://transcribe.whisperapi.com',
+  openAIServerUrl:
+    process.env.OPENAI_API_URL ||
+    'https://api.openai.com/v1/audio/transcriptions',
+  whisperApiKey: process.env.WHISPER_API_KEY || '', // Default: ""
 
-	// Text-to-Speech
-	ttsEnabled: getEnvBooleanWithDefault("TTS_ENABLED", false), // Default: false
-	ttsMode: getEnvTTSMode(), // Default: speech-api
+  // Text-to-Speech
+  ttsEnabled: getEnvBooleanWithDefault('TTS_ENABLED', false), // Default: false
+  ttsMode: getEnvTTSMode(), // Default: speech-api
 
-	// Transcription
-	transcriptionEnabled: getEnvBooleanWithDefault("TRANSCRIPTION_ENABLED", false), // Default: false
-	transcriptionMode: getEnvTranscriptionMode(), // Default: local
-	transcriptionLanguage: process.env.TRANSCRIPTION_LANGUAGE || "" // Default: null
+  // Transcription
+  transcriptionEnabled: getEnvBooleanWithDefault(
+    'TRANSCRIPTION_ENABLED',
+    false
+  ), // Default: false
+  transcriptionMode: getEnvTranscriptionMode(), // Default: local
+  transcriptionLanguage: process.env.TRANSCRIPTION_LANGUAGE || '' // Default: null
 };
 
 /**
@@ -100,12 +113,12 @@ const config: IConfig = {
  * @returns The max model tokens from the environment variable or 4096
  */
 function getEnvMaxModelTokens() {
-	const envValue = process.env.MAX_MODEL_TOKENS;
-	if (envValue == undefined || envValue == "") {
-		return 4096;
-	}
+  const envValue = process.env.MAX_MODEL_TOKENS;
+  if (envValue == undefined || envValue == '') {
+    return 4096;
+  }
 
-	return parseInt(envValue);
+  return parseInt(envValue);
 }
 
 /**
@@ -115,12 +128,12 @@ function getEnvMaxModelTokens() {
  * @returns The value of the environment variable or the default value
  */
 function getEnvBooleanWithDefault(key: string, defaultValue: boolean): boolean {
-	const envValue = process.env[key]?.toLowerCase();
-	if (envValue == undefined || envValue == "") {
-		return defaultValue;
-	}
+  const envValue = process.env[key]?.toLowerCase();
+  if (envValue == undefined || envValue == '') {
+    return defaultValue;
+  }
 
-	return envValue == "true";
+  return envValue == 'true';
 }
 
 /**
@@ -128,12 +141,20 @@ function getEnvBooleanWithDefault(key: string, defaultValue: boolean): boolean {
  * @returns Blacklisted categories for prompt moderation
  */
 function getEnvPromptModerationBlacklistedCategories(): string[] {
-	const envValue = process.env.PROMPT_MODERATION_BLACKLISTED_CATEGORIES;
-	if (envValue == undefined || envValue == "") {
-		return ["hate", "hate/threatening", "self-harm", "sexual", "sexual/minors", "violence", "violence/graphic"];
-	} else {
-		return JSON.parse(envValue.replace(/'/g, '"'));
-	}
+  const envValue = process.env.PROMPT_MODERATION_BLACKLISTED_CATEGORIES;
+  if (envValue == undefined || envValue == '') {
+    return [
+      'hate',
+      'hate/threatening',
+      'self-harm',
+      'sexual',
+      'sexual/minors',
+      'violence',
+      'violence/graphic'
+    ];
+  } else {
+    return JSON.parse(envValue.replace(/'/g, '"'));
+  }
 }
 
 /**
@@ -141,12 +162,12 @@ function getEnvPromptModerationBlacklistedCategories(): string[] {
  * @returns The transcription mode
  */
 function getEnvTranscriptionMode(): TranscriptionMode {
-	const envValue = process.env.TRANSCRIPTION_MODE?.toLowerCase();
-	if (envValue == undefined || envValue == "") {
-		return TranscriptionMode.Local;
-	}
+  const envValue = process.env.TRANSCRIPTION_MODE?.toLowerCase();
+  if (envValue == undefined || envValue == '') {
+    return TranscriptionMode.Local;
+  }
 
-	return envValue as TranscriptionMode;
+  return envValue as TranscriptionMode;
 }
 
 /**
@@ -154,12 +175,12 @@ function getEnvTranscriptionMode(): TranscriptionMode {
  * @returns The tts mode
  */
 function getEnvTTSMode(): TTSMode {
-	const envValue = process.env.TTS_MODE?.toLowerCase();
-	if (envValue == undefined || envValue == "") {
-		return TTSMode.SpeechAPI;
-	}
+  const envValue = process.env.TTS_MODE?.toLowerCase();
+  if (envValue == undefined || envValue == '') {
+    return TTSMode.SpeechAPI;
+  }
 
-	return envValue as TTSMode;
+  return envValue as TTSMode;
 }
 
 /**
@@ -167,12 +188,12 @@ function getEnvTTSMode(): TTSMode {
  * @returns The voice engine
  */
 function getEnvAWSPollyVoiceEngine(): AWSPollyEngine {
-	const envValue = process.env.AWS_POLLY_VOICE_ENGINE?.toLowerCase();
-	if (envValue == undefined || envValue == "") {
-		return AWSPollyEngine.Standard;
-	}
+  const envValue = process.env.AWS_POLLY_VOICE_ENGINE?.toLowerCase();
+  if (envValue == undefined || envValue == '') {
+    return AWSPollyEngine.Standard;
+  }
 
-	return envValue as AWSPollyEngine;
+  return envValue as AWSPollyEngine;
 }
 
 export default config;

@@ -1,3 +1,4 @@
-const startsWithIgnoreCase = (str, prefix) => str.toLowerCase().startsWith(prefix.toLowerCase());
+const startsWithIgnoreCase = (str, prefix) =>
+  str.toLowerCase().startsWith(prefix.toLowerCase());
 
 export { startsWithIgnoreCase };
