@@ -1,4 +1,3 @@
-import { Message } from 'whatsapp-web.js';
 import {
   aiConfigTarget,
   aiConfigTypes,
@@ -14,11 +13,10 @@ const aiConfig: IAiConfig = {
   // chatgpt: {}
 };
 
-const handleMessageAIConfig = async (message: Message, prompt: any) => {
+const handleMessageAIConfig = async (
+  prompt: any
+): Promise<string> => {
   try {
-    console.log(
-      '[AI-Config] Received prompt from ' + message.from + ': ' + prompt
-    );
 
     const args: string[] = prompt.split(' ');
 
@@ -41,16 +39,12 @@ const handleMessageAIConfig = async (message: Message, prompt: any) => {
           ).join(', ')}\n`;
         }
       }
-      message.reply(helpMessage);
-      return;
+      return helpMessage;
     }
 
     // !config <target> <type> <value>
     if (args.length !== 3) {
-      message.reply(
-        'Invalid number of arguments, please use the following format: <target> <type> <value> or type !config help for more information.'
-      );
-      return;
+      return 'Invalid number of arguments, please use the following format: <target> <type> <value> or type !config help for more information.';
     }
 
     const target: string = args[0];
@@ -58,38 +52,35 @@ const handleMessageAIConfig = async (message: Message, prompt: any) => {
     const value: string = args[2];
 
     if (!(target in aiConfigTarget)) {
-      message.reply(
+      return (
         'Invalid target, please use one of the following: ' +
-          Object.keys(aiConfigTarget).join(', ')
+        Object.keys(aiConfigTarget).join(', ')
       );
-      return;
     }
 
     if (!(type in aiConfigTypes[target])) {
-      message.reply(
+      return (
         'Invalid type, please use one of the following: ' +
-          Object.keys(aiConfigTypes[target]).join(', ')
+        Object.keys(aiConfigTypes[target]).join(', ')
       );
-      return;
     }
 
     if (!(value in aiConfigValues[target][type])) {
-      message.reply(
+      return (
         'Invalid value, please use one of the following: ' +
-          Object.keys(aiConfigValues[target][type]).join(', ')
+        Object.keys(aiConfigValues[target][type]).join(', ')
       );
-      return;
     }
 
     aiConfig[target][type] = value;
 
-    message.reply('Successfully set ' + target + ' ' + type + ' to ' + value);
+    return 'Successfully set ' + target + ' ' + type + ' to ' + value;
   } catch (error: any) {
     console.error('An error occured', error);
-    message.reply(
+    return (
       'An error occured, please contact the administrator. (' +
-        error.message +
-        ')'
+      error.message +
+      ')'
     );
   }
 };

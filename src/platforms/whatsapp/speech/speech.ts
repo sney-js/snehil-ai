@@ -1,4 +1,4 @@
-import config from '../config';
+import config from '../../../config';
 
 /**
  * @param text The sentence to be converted to speech

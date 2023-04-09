@@ -1,6 +1,5 @@
-import { MessageMedia } from 'whatsapp-web.js';
 import { openai } from '../providers/openai';
-import { aiConfig } from '../handlers/ai-config';
+import { aiConfig } from './ai-config';
 import { CreateImageRequestSizeEnum } from 'openai';
 import config from '../config';
 import * as cli from '../ui/cli';
@@ -8,20 +7,13 @@ import * as cli from '../ui/cli';
 // Moderation
 import { moderateIncomingPrompt } from './moderation';
 
-const handleMessageDALLE = async (message: any, prompt: any) => {
+const handleMessageDALLE = async (prompt: any): Promise<string> => {
   try {
-    const start = Date.now();
-
-    cli.print(`[DALL-E] Received prompt from ${message.from}: ${prompt}`);
+    cli.print(`[DALL-E] Received prompt from  ${prompt}`);
 
     // Prompt Moderation
     if (config.promptModerationEnabled) {
-      try {
-        await moderateIncomingPrompt(prompt);
-      } catch (error: any) {
-        message.reply(error.message);
-        return;
-      }
+      await moderateIncomingPrompt(prompt);
     }
 
     // Send the prompt to the API
@@ -32,23 +24,10 @@ const handleMessageDALLE = async (message: any, prompt: any) => {
       response_format: 'b64_json'
     });
 
-    const end = Date.now() - start;
-
-    const base64 = response.data.data[0].b64_json as string;
-    const image = new MessageMedia('image/jpeg', base64, 'image.jpg');
-
-    cli.print(
-      `[DALL-E] Answer to ${message.from} | OpenAI request took ${end}ms`
-    );
-
-    message.reply(image);
+    return response.data.data[0].b64_json as string;
   } catch (error: any) {
     console.error('An error occured', error);
-    message.reply(
-      'An error occured, please contact the administrator. (' +
-        error.message +
-        ')'
-    );
+    throw Error(error);
   }
 };
 

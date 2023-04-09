@@ -1,4 +1,4 @@
-import config from '../config';
+import config from '../../../config';
 
 async function transcribeWhisperApi(
   audioBlob: Blob

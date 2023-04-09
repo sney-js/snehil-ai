@@ -1,38 +1,32 @@
-import * as os from 'os';
-import * as fs from 'fs';
-import * as path from 'path';
 import { randomUUID } from 'crypto';
-import { Message, MessageMedia } from 'whatsapp-web.js';
 import { chatgpt } from '../providers/openai';
 import * as cli from '../ui/cli';
 import config from '../config';
 
-// TTS
-import { ttsRequest as speechTTSRequest } from '../speech/speech';
-import { ttsRequest as awsTTSRequest } from '../speech/aws';
-
 // Moderation
 import { moderateIncomingPrompt } from './moderation';
-import { TTSMode } from '../types/transcription-mode';
 
 // Mapping from number to last co
 // nversation id
 const conversations = {};
 
-const handleMessageGPT = async (message: Message, prompt: string) => {
+const handleMessageGPT = async (
+  conversationID: string,
+  prompt: string
+): Promise<string> => {
   try {
     // Get last conversation
-    const lastConversationId = conversations[message.from];
+    const lastConversationId = conversations[conversationID];
 
-    cli.print(`[GPT] Received prompt from ${message.from}: ${prompt}`);
+    cli.print(`[GPT] Received prompt from ${conversationID}: ${prompt}`);
 
     // Prompt Moderation
     if (config.promptModerationEnabled) {
       try {
         await moderateIncomingPrompt(prompt);
       } catch (error: any) {
-        message.reply(error.message);
-        return;
+        // message.reply(error.message);
+        return error.message;
       }
     }
 
@@ -49,9 +43,9 @@ const handleMessageGPT = async (message: Message, prompt: string) => {
       const conv = chatgpt.addConversation(convId);
 
       // Set conversation
-      conversations[message.from] = conv.id;
+      conversations[conversationID] = conv.id;
 
-      cli.print(`[GPT] New conversation for ${message.from} (ID: ${conv.id})`);
+      cli.print(`[GPT] New conversation for ${conversationID} (ID: ${conv.id})`);
 
       // Pre prompt
       if (config.prePrompt != null && config.prePrompt.trim() != '') {
@@ -67,99 +61,34 @@ const handleMessageGPT = async (message: Message, prompt: string) => {
     const end = Date.now() - start;
 
     cli.print(
-      `[GPT] Answer to ${message.from}: ${response}  | OpenAI request took ${end}ms)`
+      `[GPT] Answer to ${conversationID}: ${response}  | OpenAI request took ${end}ms)`
     );
 
     // TTS reply (Default: disabled)
-    if (config.ttsEnabled) {
-      sendVoiceMessageReply(message, response);
-      return;
-    }
+    // if (config.ttsEnabled) {
+    //   sendVoiceMessageReply(message, response);
+    //   return;
+    // }
 
     // Default: Text reply
-    message.reply(response);
+    // message.reply(response);
+    return response;
   } catch (error: any) {
     console.error('An error occured', error);
-    message.reply(
+    return (
       'An error occured, please contact the administrator. (' +
-        error.message +
-        ')'
+      error.message +
+      ')'
     );
   }
 };
 
-const handleDeleteConversation = async (message: Message) => {
+const handleDeleteConversation = async (from: string) => {
   // Delete conversation
-  delete conversations[message.from];
+  delete conversations[from];
 
   // Reply
-  message.reply('Conversation context was resetted!');
+  return 'Conversation context was resetted!';
 };
-
-async function sendVoiceMessageReply(
-  message: Message,
-  gptTextResponse: string
-) {
-  var logTAG = '[TTS]';
-  var ttsRequest = async function (): Promise<Buffer | null> {
-    return await speechTTSRequest(gptTextResponse);
-  };
-
-  switch (config.ttsMode) {
-    case TTSMode.SpeechAPI:
-      logTAG = '[SpeechAPI]';
-      ttsRequest = async function (): Promise<Buffer | null> {
-        return await speechTTSRequest(gptTextResponse);
-      };
-      break;
-
-    case TTSMode.AWSPolly:
-      logTAG = '[AWSPolly]';
-      ttsRequest = async function (): Promise<Buffer | null> {
-        return await awsTTSRequest(gptTextResponse);
-      };
-      break;
-
-    default:
-      logTAG = '[SpeechAPI]';
-      ttsRequest = async function (): Promise<Buffer | null> {
-        return await speechTTSRequest(gptTextResponse);
-      };
-      break;
-  }
-
-  // Get audio buffer
-  cli.print(
-    `${logTAG} Generating audio from GPT response "${gptTextResponse}"...`
-  );
-  const audioBuffer = await ttsRequest();
-
-  // Check if audio buffer is valid
-  if (audioBuffer == null || audioBuffer.length == 0) {
-    message.reply(
-      `${logTAG} couldn't generate audio, please contact the administrator.`
-    );
-    return;
-  }
-
-  cli.print(`${logTAG} Audio generated!`);
-
-  // Get temp folder and file path
-  const tempFolder = os.tmpdir();
-  const tempFilePath = path.join(tempFolder, randomUUID() + '.opus');
-
-  // Save buffer to temp file
-  fs.writeFileSync(tempFilePath, audioBuffer);
-
-  // Send audio
-  const messageMedia = new MessageMedia(
-    'audio/ogg; codecs=opus',
-    audioBuffer.toString('base64')
-  );
-  message.reply(messageMedia);
-
-  // Delete temp file
-  fs.unlinkSync(tempFilePath);
-}
 
 export { handleMessageGPT, handleDeleteConversation };

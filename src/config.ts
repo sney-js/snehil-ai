@@ -4,7 +4,7 @@ import {
   AWSPollyEngine,
   TranscriptionMode,
   TTSMode
-} from './types/transcription-mode';
+} from './platforms/whatsapp/speech/transcription-mode';
 
 // Environment variables
 import * as dotenv from 'dotenv';

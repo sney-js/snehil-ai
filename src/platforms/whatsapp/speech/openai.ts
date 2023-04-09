@@ -1,4 +1,4 @@
-import config from '../config';
+import config from '../../../config';
 import * as os from 'os';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
