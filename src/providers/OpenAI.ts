@@ -3,19 +3,6 @@ import { Configuration, OpenAIApi } from 'openai';
 import process from 'process';
 import getConfig, { IConfig } from '../configs/config';
 
-/*
-export const chatgpt: ChatGPT = new ChatGPT(
-  process.env.OPENAI_API_KEY || '',
-  options
-); // Note: options is optional
-
-// OpenAI Client (DALL-E)
-export const openAI = new OpenAIApi(
-  new Configuration({
-    apiKey: process.env.OPENAI_API_KEY
-  })
-);*/
-
 class OpenAI {
   private config: IConfig;
   private chatGPT: ChatGPT;
@@ -38,7 +25,7 @@ class OpenAI {
     return OpenAI._instance || new OpenAI();
   }
 
-  public getChatGPT(): ChatGPT {
+  public async getChatGPT(): Promise<ChatGPT> {
     if (!this.chatGPT) {
       let options: ChatGPT['options'] = {
         temperature: 0.2,
@@ -50,13 +37,17 @@ class OpenAI {
         model: process.env.OPENAI_GPT_MODEL || 'gpt-3.5-turbo'
       };
 
-      this.chatGPT = new ChatGPT(this.configuration.apiKey as string, options);
+      this.chatGPT = new ChatGPT([process.env.OPENAI_API_KEY || ''], options);
+      await new Promise((resolve) => setTimeout(() => resolve(true), 500));
     }
+    //delaying because of race condition in poor chatgtp library code
     return this.chatGPT;
   }
 
   public async testChatGPTPing() {
-    return this.getChatGPT()
+    console.log('Testing OpenAI Connection...');
+    let chatGPT = await this.getChatGPT();
+    return chatGPT
       .ask('Say hi if you are receiving this')
       .then((res) => {
         console.log('Successful ChatGPT response', res);

@@ -1,24 +1,23 @@
 {
   "name": "whatsapp-chatgpt",
   "version": "1.0.0",
-  "description": "Whatsapp bot that uses OpenAI's GPT & DALLE to respond to user inputs",
+  "description": "ChatGPT and DallE Utils",
   "main": "src/index.ts",
-  "author": "Askrella Software Agency UG (haftungsbeschränkt)",
+  "author": "Snehil Bhushan",
   "scripts": {
     "start": "vite-node src/index.ts",
     "start-terminal": "vite-node src/cliChat.ts",
+    "build": "ts-node --esm src/index.ts",
     "prettier": "prettier --write src"
   },
   "license": "MIT",
   "dependencies": {
     "@clack/prompts": "^0.4.3",
-    "aws-sdk": "^2.1332.0",
     "chatgpt-official": "^1.1.5",
     "dotenv": "^16.0.3",
-    "fetch-blob": "^3.2.0",
-    "ffmpeg": "^0.0.4",
     "openai": "^3.1.0",
     "picocolors": "^1.0.0",
+    "prompts": "^2.4.2",
     "qrcode-terminal": "^0.12.0",
     "whatsapp-web.js": "^1.19.5"
   },
@@ -33,10 +32,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.4",
-    "prompts": "^2.4.2",
     "vite-node": "^0.30.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

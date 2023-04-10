@@ -15,9 +15,9 @@ export class CompanionAI {
   protected handleRequestChatbot(
     prompt,
     conversationID,
-    from?
+    username?
   ): Promise<string> {
-    return handleMessageGPT(conversationID, prompt);
+    return handleMessageGPT(conversationID, prompt, username);
   }
 
   protected handleRequestImageAI(prompt): Promise<string> {

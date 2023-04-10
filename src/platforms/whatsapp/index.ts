@@ -154,7 +154,7 @@ export class WhatsAppBot extends CompanionAI {
   }
 
   async handleIncomingMessage(message: Message): Promise<void> {
-    const { body, from, fromMe, hasQuotedMsg, to } = message;
+    let { body, from: convID, fromMe, hasQuotedMsg, to, author } = message;
 
     const requestOptions = this.isCompanionRelevantMessage(body);
     // no proessing needed. Ignore message.
@@ -168,19 +168,19 @@ export class WhatsAppBot extends CompanionAI {
 
     if (hasQuotedMsg) {
       const repliedMessage: Message = await message.getQuotedMessage();
-      prompt += `----\n${repliedMessage.body}`;
+      prompt += `----\n${repliedMessage.author}: ${repliedMessage.body}`;
     }
 
     if (requestOptions.requestedReset) {
-      cli.print(`[RESET] Received prompt from ${from}: ${prompt}`);
-      await this.handleRequestResetConversation(from).then((res) =>
+      cli.print(`[RESET] Received prompt from convID ${convID}: ${prompt}`);
+      await this.handleRequestResetConversation(convID).then((res) =>
         message.reply(res)
       );
       return;
     }
 
     if (requestOptions.requestedConfigChange) {
-      console.log(`[AI-Config] Received prompt from ${from}: ${prompt}`);
+      console.log(`[AI-Config] Received prompt from convID ${convID}: ${prompt}`);
       await this.handleRequestAdmin(prompt).then(() =>
         message.reply('Config set!')
       );
@@ -188,9 +188,9 @@ export class WhatsAppBot extends CompanionAI {
     }
 
     if (requestOptions.requestedChatAI) {
-      cli.print(`[GPT] Received prompt from ${from}: ${prompt}`);
-      await this.handleRequestChatbot(prompt, from).then((res) => {
-        cli.print(`[GPT] Answer to ${from}: ${res})`);
+      cli.print(`[GPT] Received prompt from convID ${convID}: ${prompt}`);
+      await this.handleRequestChatbot(prompt, convID, author).then((res) => {
+        cli.print(`[GPT] Answer to ${convID}: ${res})`);
         return message.reply(res);
       });
       return;
@@ -198,14 +198,14 @@ export class WhatsAppBot extends CompanionAI {
 
     if (requestOptions.requestedImageAI) {
       const start = Date.now();
-      cli.print(`[DALL-E] Received prompt from ${from}: ${prompt}`);
+      cli.print(`[DALL-E] Received prompt from convID ${convID}: ${prompt}`);
       await this.handleRequestImageAI(prompt)
         .then((base64) => {
           const image = new MessageMedia('image/jpeg', base64, 'image.jpg');
 
           const end = Date.now() - start;
           cli.print(
-            `[DALL-E] Answer to ${from} | OpenAI request took ${end}ms`
+            `[DALL-E] Answer to ${convID} | OpenAI request took ${end}ms`
           );
 
           message.reply(image);
