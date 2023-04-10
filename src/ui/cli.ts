@@ -1,5 +1,6 @@
 import { intro, spinner, note, outro, text } from '@clack/prompts';
 import * as color from 'picocolors';
+import * as qrcode from 'qrcode-terminal';
 
 const s = spinner();
 
@@ -15,9 +16,19 @@ export const printIntro = () => {
   s.start('Starting');
 };
 
-export const printQRCode = (qr: string) => {
+export const printQRCode = (qrString: string) => {
   s.stop('Client is ready!');
-  note(qr, 'Scan the QR code below to login to Whatsapp Web.');
+
+  note(qrString, 'QR as code');
+
+  qrcode.generate(qrString, { small: true }, (qrcode: string) => {
+    note(qrcode, 'Scan the QR code below to login to Whatsapp Web.');
+  });
+
+  qrcode.generate(qrString, { small: false }, (qrcode: string) => {
+    note(qrcode, 'OR Scan the bigger QR code below to login to Whatsapp Web.');
+  });
+
   s.start('Waiting for QR code to be scanned');
 };
 
