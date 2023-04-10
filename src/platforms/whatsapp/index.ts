@@ -1,4 +1,3 @@
-import * as qrcode from 'qrcode-terminal';
 import {
   Client,
   Events,
@@ -41,9 +40,7 @@ export class WhatsAppBot extends CompanionAI {
 
     // WhatsApp auth
     client.on(Events.QR_RECEIVED, (qr: string) => {
-      qrcode.generate(qr, { small: true }, (qrcode: string) => {
-        cli.printQRCode(qrcode);
-      });
+      cli.printQRCode(qr);
     });
 
     // WhatsApp loading
