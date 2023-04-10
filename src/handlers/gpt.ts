@@ -11,7 +11,7 @@ const handleMessageGPT = async (
   prompt: string,
   username?: string
 ): Promise<string> => {
-  const chatGPT = OpenAI.getInstance().getChatGPT();
+  const chatGPT = await OpenAI.getInstance().getChatGPT();
   const config = getConfig();
 
   try {

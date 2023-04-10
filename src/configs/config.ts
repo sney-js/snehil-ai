@@ -123,15 +123,16 @@ const getConfig = (): IConfig => {
   if (!botConfig) throw Error('Cannot get Config');
 
   const configLocal: IConfig = {
-    prePrompt: getPrePrompt(botConfig), // Default: undefined
-    gptPrefix: botConfig?.triggers.aiChat || '@ai', // Default: !gpt
-    dallePrefix: botConfig?.triggers.aiImage || '@ai-img', // Default: !dalle
-    resetPrefix: botConfig?.triggers.aiReset || '@ai-reset', // Default: !reset
-    aiConfigPrefix: botConfig?.triggers.aiAdmin || '@ai-admin', // Default: !config
-    // gptPrefix: process.env.GPT_PREFIX || '@ai', // Default: !gpt
-    // dallePrefix: process.env.DALLE_PREFIX || '@ai-img', // Default: !dalle
-    // resetPrefix: process.env.RESET_PREFIX || '@ai-reset', // Default: !reset
-    // aiConfigPrefix: process.env.AI_CONFIG_PREFIX || '@ai-admin', // Default: !config
+    gptPrefix: process.env.GPT_PREFIX || botConfig?.triggers.aiChat || '@ai',
+    dallePrefix:
+      process.env.DALLE_PREFIX || botConfig?.triggers.aiImage || '@ai-img',
+    resetPrefix:
+      process.env.RESET_PREFIX || botConfig?.triggers.aiReset || '@ai-reset',
+    aiConfigPrefix:
+      process.env.AI_CONFIG_PREFIX ||
+      botConfig?.triggers.aiAdmin ||
+      '@ai-admin',
+    prePrompt: getPrePrompt(botConfig),
 
     // Groupchats
     groupchatsEnabled: getEnvBooleanWithDefault('GROUPCHATS_ENABLED', false), // Default: false
