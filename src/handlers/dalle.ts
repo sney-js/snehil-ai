@@ -1,49 +1,38 @@
-import { MessageMedia } from "whatsapp-web.js";
-import { openai } from "../providers/openai";
-import { aiConfig } from "../handlers/ai-config";
-import { CreateImageRequestSizeEnum } from "openai";
-import config from "../config";
-import * as cli from "../cli/ui";
+import OpenAI from '../providers/OpenAI';
+import getConfig from '../configs/config';
+import * as cli from '../ui/cli';
 
 // Moderation
-import { moderateIncomingPrompt } from "./moderation";
+import { moderateIncomingPrompt } from './moderation';
+import { CreateImageRequestSizeEnum } from 'openai';
 
-const handleMessageDALLE = async (message: any, prompt: any) => {
-	try {
-		const start = Date.now();
+const handleMessageDALLE = async (
+  prompt: string,
+  size: 512 | 256 | 1024 = 512
+): Promise<string> => {
+  const openAI = OpenAI.getInstance().getOpenAI();
+  const config = getConfig();
+  try {
+    cli.print(`[DALL-E] Received prompt from  ${prompt}`);
 
-		cli.print(`[DALL-E] Received prompt from ${message.from}: ${prompt}`);
+    // Prompt Moderation
+    if (config.promptModerationEnabled) {
+      await moderateIncomingPrompt(prompt);
+    }
 
-		// Prompt Moderation
-		if (config.promptModerationEnabled) {
-			try {
-				await moderateIncomingPrompt(prompt);
-			} catch (error: any) {
-				message.reply(error.message);
-				return;
-			}
-		}
+    // Send the prompt to the API
+    const response = await openAI.createImage({
+      prompt,
+      n: 1,
+      size: `${size}x${size}` as CreateImageRequestSizeEnum,
+      response_format: 'b64_json'
+    });
 
-		// Send the prompt to the API
-		const response = await openai.createImage({
-			prompt: prompt,
-			n: 1,
-			size: aiConfig.dalle.size as CreateImageRequestSizeEnum,
-			response_format: "b64_json"
-		});
-
-		const end = Date.now() - start;
-
-		const base64 = response.data.data[0].b64_json as string;
-		const image = new MessageMedia("image/jpeg", base64, "image.jpg");
-
-		cli.print(`[DALL-E] Answer to ${message.from} | OpenAI request took ${end}ms`);
-
-		message.reply(image);
-	} catch (error: any) {
-		console.error("An error occured", error);
-		message.reply("An error occured, please contact the administrator. (" + error.message + ")");
-	}
+    return response.data.data[0].b64_json as string;
+  } catch (error: any) {
+    console.error('An error occured', error);
+    throw Error(error);
+  }
 };
 
 export { handleMessageDALLE };

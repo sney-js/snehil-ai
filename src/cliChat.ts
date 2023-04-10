@@ -1,4 +1,4 @@
-import { WhatsAppBot } from './platforms/whatsapp';
+import { TerminalBot } from './platforms/terminal';
 import getConfig, { IConfig } from './configs/config';
 import OpenAI from './providers/OpenAI';
 
@@ -7,6 +7,6 @@ import OpenAI from './providers/OpenAI';
 
   await OpenAI.getInstance().testChatGPTPing();
 
-  const whatsappBot = new WhatsAppBot(config);
+  const whatsappBot = new TerminalBot(config);
   whatsappBot.initialise().catch();
 })();
