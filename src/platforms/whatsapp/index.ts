@@ -154,8 +154,17 @@ export class WhatsAppBot extends CompanionAI {
   }
 
   async handleIncomingMessage(message: Message): Promise<void> {
-    let { body, from: convID, fromMe, hasQuotedMsg, to, author } = message;
+    let {
+      body,
+      from,
+      fromMe,
+      hasQuotedMsg,
+      to,
+      author = from
+    } = message;
 
+    let convID = [from,to].sort().join('/');
+    // console.table({ body: body.substring(0,10), convID, fromMe, to, author });
     const requestOptions = this.isCompanionRelevantMessage(body);
     // no proessing needed. Ignore message.
     if (!requestOptions.any) return;
@@ -180,7 +189,9 @@ export class WhatsAppBot extends CompanionAI {
     }
 
     if (requestOptions.requestedConfigChange) {
-      console.log(`[AI-Config] Received prompt from convID ${convID}: ${prompt}`);
+      console.log(
+        `[AI-Config] Received prompt from convID ${convID}: ${prompt}`
+      );
       await this.handleRequestAdmin(prompt).then(() =>
         message.reply('Config set!')
       );
