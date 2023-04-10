@@ -10,7 +10,7 @@ import OpenAI from '../providers/OpenAI';
  */
 const moderateIncomingPrompt = async (prompt: string) => {
   const openAI = OpenAI.getInstance().getOpenAI();
-  cli.print('[MODERATION] Checking user prompt...');
+  // cli.print('[MODERATION] Checking user prompt...');
   const moderationResponse = await openAI.createModeration({
     input: prompt
   });
@@ -19,10 +19,6 @@ const moderateIncomingPrompt = async (prompt: string) => {
   const moderationResponseCategories =
     moderationResponseData.results[0].categories;
   let config = getConfig();
-  console.log(
-    config.promptModerationBlacklistedCategories,
-    'config.promptModerationBlacklistedCategories'
-  );
 
   const blackListedCategories = config.promptModerationBlacklistedCategories;
 
@@ -32,11 +28,11 @@ const moderateIncomingPrompt = async (prompt: string) => {
       return `${category}: ${moderationResponseCategories[category]}`;
     }
   );
-  cli.print(
-    `[MODERATION] OpenAI Moderation response: ${JSON.stringify(
-      categoriesForPrint
-    )}`
-  );
+  // cli.print(
+  //   `[MODERATION] OpenAI Moderation response: ${JSON.stringify(
+  //     categoriesForPrint
+  //   )}`
+  // );
 
   // Check if any of the blacklisted categories are set to true
   for (const category of blackListedCategories) {

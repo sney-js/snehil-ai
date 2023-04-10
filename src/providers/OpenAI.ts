@@ -1,7 +1,7 @@
 import { ChatGPT } from 'chatgpt-official';
 import { Configuration, OpenAIApi } from 'openai';
 import process from 'process';
-import { IConfig } from '../configs/config';
+import getConfig, { IConfig } from '../configs/config';
 
 /*
 export const chatgpt: ChatGPT = new ChatGPT(
@@ -25,8 +25,8 @@ class OpenAI {
   private configuration: Configuration;
 
   constructor(_config?: IConfig) {
-    if (_config) {
-      this.config = _config;
+    if (!this.config) {
+      this.config = _config || getConfig();
     }
     this.configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY
@@ -46,7 +46,7 @@ class OpenAI {
         top_p: 0.9,
         frequency_penalty: 0,
         presence_penalty: 0,
-        // instructions: ``,
+        instructions: this.config.prePrompt,
         model: process.env.OPENAI_GPT_MODEL || 'gpt-3.5-turbo'
       };
 

@@ -1,22 +1,11 @@
-import * as cli from '../../ui/cli';
 import { CompanionAI } from '../../providers/companionAI';
 import prompts from 'prompts';
-import OpenAI from '../../providers/OpenAI';
-import { ChatGPT } from 'chatgpt-official';
 import { randomUUID } from 'crypto';
 
 export class TerminalBot extends CompanionAI {
-  botReadyTimestamp: Date | null = null;
-  private chatGPT: ChatGPT;
   private conversationID: string;
 
   override async initialise() {
-    cli.printIntro();
-    cli.printOutro();
-
-    // Set bot ready timestamp
-    this.botReadyTimestamp = new Date();
-    this.chatGPT = OpenAI.getInstance().getChatGPT();
     this.conversationID = randomUUID();
     await this.startGPTChat();
   }
@@ -29,15 +18,20 @@ export class TerminalBot extends CompanionAI {
     })
       .then((response) => {
         if (response.answer === '!q') process.exit(0);
+        if (response.answer === '!reset') {
+          return this.handleRequestResetConversation(this.conversationID);
+        }
 
-        return this.chatGPT.ask(
+        return this.handleRequestChatbot(
           response.answer,
           this.conversationID,
           'John Doe'
-        );
+        ).then((res) => {
+          console.log('GPT:', res);
+          return res;
+        });
       })
-      .then((response) => {
-        console.log('GPT:', response);
+      .then(() => {
         return this.startGPTChat();
       });
   }

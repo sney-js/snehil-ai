@@ -6,6 +6,4 @@ export const AIConfigDefaults: AIConfigType = {
 
 export const handleMessageAIConfig = async (
   configData: AIConfigType
-): Promise<void> => {
-
-};
+): Promise<void> => {};

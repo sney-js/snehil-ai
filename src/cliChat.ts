@@ -4,7 +4,6 @@ import OpenAI from './providers/OpenAI';
 
 (async function () {
   const config: IConfig = getConfig();
-  console.log(config, 'config');
 
   await OpenAI.getInstance().testChatGPTPing();
 

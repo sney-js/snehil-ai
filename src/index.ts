@@ -2,13 +2,11 @@ import { WhatsAppBot } from './platforms/whatsapp';
 import getConfig, { IConfig } from './configs/config';
 import OpenAI from './providers/OpenAI';
 
-(async function(){
+(async function () {
   const config: IConfig = getConfig();
-  console.log(config, 'config');
 
   await OpenAI.getInstance().testChatGPTPing();
 
   const whatsappBot = new WhatsAppBot(config);
   whatsappBot.initialise().catch();
-
-})()
+})();

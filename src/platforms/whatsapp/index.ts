@@ -192,9 +192,10 @@ export class WhatsAppBot extends CompanionAI {
 
     if (requestOptions.requestedChatAI) {
       cli.print(`[GPT] Received prompt from ${from}: ${prompt}`);
-      await this.handleRequestChatbot(prompt, from).then((res) =>
-        message.reply(res)
-      );
+      await this.handleRequestChatbot(prompt, from).then((res) => {
+        cli.print(`[GPT] Answer to ${from}: ${res})`);
+        return message.reply(res);
+      });
       return;
     }
 
