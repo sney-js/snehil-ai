@@ -24,7 +24,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "typeRoots": ["../../node_modules/@types",
-      "./src/utils/"
+      "./src/configs/"
     ]
   },
   "include": ["./src", "src/__tests__"],

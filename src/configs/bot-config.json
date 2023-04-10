@@ -1,0 +1,24 @@
+{
+  "triggers": {
+    "aiChat": "@snehil-ai",
+    "aiImage": "@snehil-ai-image",
+    "aiReset": "@snehil-ai-reset",
+    "aiAdmin": "@snehil-ai-admin",
+    "chatPlatform": "Whatsapp"
+  },
+  "traits": {
+    "masterName": "Snehil",
+    "masterPersonality": "witty, warm, educated, funny",
+    "masterInfo": "30 year old Indian man who speaks English and Hindi.",
+    "botCaveats": "If messages are exchanged after a day, give a greeting first.",
+    "botFallback": "Hmm I think you should ask the real Snehil for this one"
+  },
+  "training": {
+    "masterChatExamples": null
+  },
+  "responsePreferences": {
+    "maxTokens": "500",
+    "temperature": 0.2,
+    "generalMessageLength": 15
+  }
+}

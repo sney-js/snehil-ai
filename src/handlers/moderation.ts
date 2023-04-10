@@ -1,6 +1,6 @@
 import * as cli from '../ui/cli';
-import config from '../utils/config';
-import { openai } from '../providers/openai';
+import getConfig from '../configs/config';
+import OpenAI from '../providers/OpenAI';
 
 /**
  * Handle prompt moderation
@@ -9,14 +9,21 @@ import { openai } from '../providers/openai';
  * @returns true if the prompt is safe, throws an error otherwise
  */
 const moderateIncomingPrompt = async (prompt: string) => {
+  const openAI = OpenAI.getInstance().getOpenAI();
   cli.print('[MODERATION] Checking user prompt...');
-  const moderationResponse = await openai.createModeration({
+  const moderationResponse = await openAI.createModeration({
     input: prompt
   });
 
   const moderationResponseData = moderationResponse.data;
   const moderationResponseCategories =
     moderationResponseData.results[0].categories;
+  let config = getConfig();
+  console.log(
+    config.promptModerationBlacklistedCategories,
+    'config.promptModerationBlacklistedCategories'
+  );
+
   const blackListedCategories = config.promptModerationBlacklistedCategories;
 
   // Print categories as [ category: true/false ]

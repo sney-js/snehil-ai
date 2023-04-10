@@ -1,7 +1,7 @@
 import { handleResetConversation, handleMessageGPT } from '../handlers/gpt';
 import { handleMessageDALLE } from '../handlers/dalle';
 import { handleMessageAIConfig } from '../platforms/whatsapp/AdminConfig';
-import { IConfig } from '../utils/config';
+import { IConfig } from '../configs/config';
 
 export class CompanionAI {
   generalConfig: IConfig;

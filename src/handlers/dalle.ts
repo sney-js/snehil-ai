@@ -1,5 +1,5 @@
-import { openai } from '../providers/openai';
-import config from '../utils/config';
+import OpenAI from '../providers/OpenAI';
+import getConfig from '../configs/config';
 import * as cli from '../ui/cli';
 
 // Moderation
@@ -10,6 +10,8 @@ const handleMessageDALLE = async (
   prompt: string,
   size: 512 | 256 | 1024 = 512
 ): Promise<string> => {
+  const openAI = OpenAI.getInstance().getOpenAI();
+  const config = getConfig();
   try {
     cli.print(`[DALL-E] Received prompt from  ${prompt}`);
 
@@ -19,7 +21,7 @@ const handleMessageDALLE = async (
     }
 
     // Send the prompt to the API
-    const response = await openai.createImage({
+    const response = await openAI.createImage({
       prompt,
       n: 1,
       size: `${size}x${size}` as CreateImageRequestSizeEnum,

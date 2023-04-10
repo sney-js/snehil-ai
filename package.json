@@ -6,6 +6,7 @@
   "author": "Askrella Software Agency UG (haftungsbeschränkt)",
   "scripts": {
     "start": "vite-node src/index.ts",
+    "start-terminal": "vite-node src/cliChat.ts",
     "prettier": "prettier --write src"
   },
   "license": "MIT",
@@ -32,6 +33,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.4",
+    "prompts": "^2.4.2",
     "vite-node": "^0.30.0"
   },
   "engines": {

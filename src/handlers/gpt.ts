@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
-import { chatgpt } from '../providers/openai';
+import OpenAI from '../providers/OpenAI';
 import * as cli from '../ui/cli';
-import config from '../utils/config';
+import getConfig from '../configs/config';
 
 // Moderation
 import { moderateIncomingPrompt } from './moderation';
@@ -14,6 +14,8 @@ const handleMessageGPT = async (
   conversationID: string,
   prompt: string
 ): Promise<string> => {
+  const chatgpt = OpenAI.getInstance().getChatGPT();
+  const config = getConfig();
   try {
     // Get last conversation
     const lastConversationId = conversations[conversationID];

@@ -91,7 +91,7 @@ export class WhatsAppBot extends CompanionAI {
 
         // Ignore messages that are sent before the bot is started
         if (messageTimestamp < this.botReadyTimestamp) {
-          cli.print('Ignoring old message: ' + messageString);
+          // cli.print('Ignoring old message: ' + messageString);
           return;
         }
       }
