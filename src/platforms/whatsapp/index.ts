@@ -131,7 +131,7 @@ export class WhatsAppBot extends CompanionAI {
 
   private isCompanionRelevantMessage(message): RequestOptions {
     const startsWithIgnoreCase = (str, prefix) =>
-      str.toLowerCase().startsWith(prefix.toLowerCase());
+      str.toLowerCase().startsWith(`${prefix} `.toLowerCase());
 
     const config = this.generalConfig;
 
