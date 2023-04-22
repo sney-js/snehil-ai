@@ -33,7 +33,7 @@ class OpenAI {
         top_p: 0.9,
         frequency_penalty: 0,
         presence_penalty: 0,
-        instructions: this.config.prePrompt,
+        // instructions: this.config.prePrompt,
         model: process.env.OPENAI_GPT_MODEL || 'gpt-3.5-turbo'
       };
 
