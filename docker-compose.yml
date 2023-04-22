@@ -1,11 +1,9 @@
 version: "3"
 services:
     whatsapp-chatgpt:
-        image: ghcr.io/askrella/whatsapp-chatgpt:master
-        environment:
-            OPENAI_API_KEY: ""
-            OPENAI_GPT_MODEL: ""
-            PREFIX_ENABLED: ""
+        build: .
+        storage_opt:
+            size: '1G'
         volumes:
             - session-data:/app/session
 volumes:
