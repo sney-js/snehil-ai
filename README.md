@@ -1,4 +1,4 @@
-# OpenAI + DALL-E + WhatsApp = Snehil AI Assistant
+# OpenAI + DALL-E + WhatsApp = Your AI Companion
 
 This WhatsApp bot uses OpenAI's GPT and DALL-E 2 to respond to user inputs.
 
