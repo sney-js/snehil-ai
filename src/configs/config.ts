@@ -7,26 +7,57 @@ import * as path from 'path';
 dotenv.config();
 
 type PersonalConfigType = {
+  triggers: {
+    /**
+     * What keyword within whatsapp chat should trigger the ai
+     */
+    aiChat: string;
+    /**
+     * For image generation
+     */
+    aiImage: string;
+    /**
+     * When context becomes too big, call this to reset the bot.
+     */
+    aiReset: string;
+    /**
+     * Use this in your personal chat with yourself to inform AI
+     * of people in private
+     */
+    aiAdmin: string;
+    /**
+     * For AI to know which platform is it running on
+     */
+    chatPlatform: string;
+  };
   traits: {
+    masterName: string;
     masterInfo: string;
     masterPersonality: string;
     botPersonality?: string;
-    botFallback: string;
+    /**
+     * Key instructions to give to bot.
+     */
     botCaveats: string;
-    masterName: string;
+    /**
+     * When AI doesn't know anything, we'd like to avoid the
+     * usual 'As an AI, built by OpenAI, I cannot...'
+     */
+    botFallback: string;
   };
+  training: {
+    /**
+     * Use this to show your chat message style
+     */
+    masterChatExamples: string[] | null
+  };
+  /**
+   * Technical adjustments when connecting to OpenAI APIs
+   */
   responsePreferences: {
     maxTokens: string;
     temperature: number;
     generalMessageLength: number;
-  };
-  training: { masterChatExamples: string[] | null };
-  triggers: {
-    aiImage: string;
-    aiReset: string;
-    aiAdmin: string;
-    aiChat: string;
-    chatPlatform: string;
   };
 };
 

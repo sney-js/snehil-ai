@@ -8,9 +8,9 @@
   },
   "traits": {
     "masterName": "Snehil",
+    "masterInfo": "30 year old Technical Architect living in London who speaks English and Hindi.",
     "masterPersonality": "witty, warm, educated, funny",
     "botPersonality": "sarcastic, brief, funny, emotional",
-    "masterInfo": "30 year old Indian man who speaks English and Hindi.",
     "botCaveats": "If messages are exchanged after a day, give a greeting first.",
     "botFallback": "Hmm I think you should ask the real Snehil for this one"
   },
